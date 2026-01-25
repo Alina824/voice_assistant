@@ -11,5 +11,5 @@ class StopCommand(Command):
         return text.strip().lower() == "хватит"
 
     def execute(self, text: str, speaker) -> None:
-        speaker.say("Останавливаю.")
+        speaker.speak("Останавливаю.")
         raise StopIteration("Пользователь сказал 'хватит'")

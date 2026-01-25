@@ -1,5 +1,4 @@
 from .time_command import TimeCommand
-from .time_command import TimeCommand
 from .timer import TimerCommand
 from  .reminder import ReminderCommand
 from .note import NoteCommand
