@@ -2,10 +2,9 @@ import re
 from assistant.core import Command
 
 class UnitConvertCommand(Command):
-
-    def __init__(self, speaker):
+    def __init__(self, speaker=None):
+        super().__init__(name="конвертер")
         self.speaker = speaker
-
         self.length_units = {
             "метр": 1.0,
             "метра": 1.0,
@@ -73,12 +72,12 @@ class UnitConvertCommand(Command):
         keywords = ["переведи", "сколько будет", "конвертируй"]
         return any(k in text.lower() for k in keywords)
 
-    def execute(self, text: str):
+    def execute(self, text: str, speaker) -> None:
         text = text.lower()
 
         match_num = re.search(r"(\d+(\.\d+)?)", text)
         if not match_num:
-            self.speaker.say("Я не услышала число.")
+            speaker.speak("Я не услышала число.")
             return
 
         value = float(match_num.group(1))
@@ -95,16 +94,16 @@ class UnitConvertCommand(Command):
                     unit_to = u
 
         if not unit_from or not unit_to:
-            self.speaker.say("Не поняла, какие единицы нужно перевести.")
+            speaker.speak("Не поняла, какие единицы нужно перевести.")
             return
 
         result = self.convert(value, unit_from, unit_to)
 
         if result is None:
-            self.speaker.say("Эти единицы несовместимы.")
+            speaker.speak("Эти единицы несовместимы.")
             return
 
-        self.speaker.say(self.pretty(result, unit_to))
+        speaker.speak(self.pretty(result, unit_to))
 
     def convert(self, value, u_from, u_to):
 

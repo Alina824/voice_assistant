@@ -2,6 +2,8 @@ from assistant.core import Command
 
 
 class WakeCommand(Command):
+    is_wake_command = True
+
     def __init__(self, assistant):
         self.assistant = assistant
         super().__init__(name="проснись")

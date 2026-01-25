@@ -1,58 +1,36 @@
 import random
 from assistant.core import Command
+from utils.text_files import load_lines, strip_numbered_prefix
+
 
 class JokeCommand(Command):
-    def __init__(self, jokes_file, speaker):
+    def __init__(self, jokes_file, speaker=None):
+        super().__init__(name="анекдот")
         self.jokes_file = jokes_file
-        self.speaker = speaker
-        self.jokes = self.load_jokes()
-
-    def load_jokes(self):
-        jokes = []
-        try:
-            with open(self.jokes_file, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if line:
-                        if line[0].isdigit() and "." in line:
-                            line = line.split(".", 1)[1].strip()
-                        jokes.append(line)
-        except FileNotFoundError:
-            print(f"[JokeCommand] Файл не найден: {self.jokes_file}")
-        return jokes
+        self.jokes = load_lines(jokes_file, parse_line=strip_numbered_prefix)
 
     def matches(self, text: str) -> bool:
         text = text.lower()
+        return "анекдот" in text or ("расскажи" in text and "анекдот" in text)
 
-        if "анекдот" in text:
-            return True
-
-        if "расскажи" in text and "анекдот" in text:
-            return True
-
-        return False
-
-    def execute(self, text: str):
+    def execute(self, text: str, speaker) -> None:
         text = text.lower()
 
         if "анекдот" in text and not any(ch.isdigit() for ch in text):
             if not self.jokes:
-                self.speaker.say("Файл с анекдотами пуст или не найден.")
+                speaker.speak("Файл с анекдотами пуст или не найден.")
                 return
-
             joke = random.choice(self.jokes)
-            self.speaker.say(joke)
+            speaker.speak(joke)
             return
 
         digits = "".join(ch for ch in text if ch.isdigit())
         if digits:
             index = int(digits) - 1
-
             if index < 0 or index >= len(self.jokes):
-                self.speaker.say(f"Анекдота под номером {index + 1} не существует.")
+                speaker.speak(f"Анекдота под номером {index + 1} не существует.")
                 return
-
-            self.speaker.say(self.jokes[index])
+            speaker.speak(self.jokes[index])
             return
 
-        self.speaker.say("Не поняла, какой анекдот нужно рассказать.")
+        speaker.speak("Не поняла, какой анекдот нужно рассказать.")

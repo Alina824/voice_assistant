@@ -1,35 +1,14 @@
-import os
 import subprocess
 import shutil
 import socket
 
-from assistant.core import Command
+from assistant.core import FileSystemCommand
+from utils.numeric import words_to_numbers
 
 
-NUMBERS = {
-    "ноль": 0,
-    "один": 1,
-    "два": 2,
-    "три": 3,
-    "четыре": 4,
-    "пять": 5,
-    "шесть": 6,
-    "семь": 7,
-    "восемь": 8,
-    "девять": 9,
-    "десять": 10,
-}
-
-
-def words_to_numbers(text: str) -> str:
-    words = text.lower().split()
-    return " ".join(str(NUMBERS.get(w, w)) for w in words)
-
-
-class CartoonCommand(Command):
+class CartoonCommand(FileSystemCommand):
     def __init__(self, videos_dir="D:/User/Videos", recognizer=None, speaker=None):
-        super().__init__()
-        self.cartoons_path = videos_dir
+        super().__init__(base_dir=videos_dir, name="мультфильм")
         self.proc = None
         self.sock = None
         self.recognizer = recognizer
@@ -123,8 +102,8 @@ class CartoonCommand(Command):
         if "мультфильм" in text or "мультик" in text:
             parts = text.split()
             cartoon = parts[-1]
-            cartoon_dir = os.path.join(self.cartoons_path, cartoon)
-            if not os.path.exists(cartoon_dir):
+            cartoon_dir = self.resolve_path(cartoon)
+            if not self.path_exists(cartoon_dir):
                 if self.speaker:
                     self.speaker.speak(f"Не нашла мультфильм {cartoon}.")
                 return
@@ -148,14 +127,14 @@ class CartoonCommand(Command):
                     self.speaker.speak("Не поняла номер сезона.")
                 return
 
-            season_dir = os.path.join(self.cartoons_path, self.current_cartoon, f"{season_num}.сезон")
-            if not os.path.exists(season_dir):
+            season_dir = self.resolve_path(self.current_cartoon, f"{season_num}.сезон")
+            if not self.path_exists(season_dir):
                 if self.speaker:
                     self.speaker.speak(f"Сезон {season_num} не найден.")
                 return
 
             self.current_season = f"{season_num}.сезон"
-            self.current_files = sorted(os.listdir(season_dir))
+            self.current_files = sorted(self.list_files_in(season_dir))
             self.current_index = None
             if self.speaker:
                 self.speaker.speak(f"Выбрала {season_num} сезон. Какая серия?")
@@ -172,21 +151,20 @@ class CartoonCommand(Command):
                     self.speaker.speak("Не поняла номер серии.")
                 return
 
-            season_dir = os.path.join(self.cartoons_path, self.current_cartoon, self.current_season)
+            season_dir = self.resolve_path(self.current_cartoon, self.current_season)
             if series_num > len(self.current_files) or series_num <= 0:
                 if self.speaker:
                     self.speaker.speak(f"Серии {series_num} нет.")
                 return
 
-            video_path = os.path.join(season_dir, self.current_files[series_num - 1])
+            video_path = self.resolve_path(self.current_cartoon, self.current_season, self.current_files[series_num - 1])
             self._play_file(video_path, series_num - 1)
             if self.speaker:
                 self.speaker.speak(f"Включаю {series_num} серию.")
 
         elif "следующая" in text and self.current_files and self.current_index is not None:
             if self.current_index + 1 < len(self.current_files):
-                season_dir = os.path.join(self.cartoons_path, self.current_cartoon, self.current_season)
-                video_path = os.path.join(season_dir, self.current_files[self.current_index + 1])
+                video_path = self.resolve_path(self.current_cartoon, self.current_season, self.current_files[self.current_index + 1])
                 self._play_file(video_path, self.current_index + 1)
                 if self.speaker:
                     self.speaker.speak("Включаю следующую серию.")
@@ -196,8 +174,7 @@ class CartoonCommand(Command):
 
         elif "предыдущая" in text and self.current_files and self.current_index is not None:
             if self.current_index - 1 >= 0:
-                season_dir = os.path.join(self.cartoons_path, self.current_cartoon, self.current_season)
-                video_path = os.path.join(season_dir, self.current_files[self.current_index - 1])
+                video_path = self.resolve_path(self.current_cartoon, self.current_season, self.current_files[self.current_index - 1])
                 self._play_file(video_path, self.current_index - 1)
                 if self.speaker:
                     self.speaker.speak("Включаю предыдущую серию.")
@@ -215,7 +192,7 @@ class CartoonCommand(Command):
             if self.speaker:
                 self.speaker.speak("Продолжаю воспроизведение.")
 
-        elif "стop" in text or "выключи" in text or "выключить" in text or "закрой мультфильм" in text:
+        elif "стоп" in text or "выключи" in text or "выключить" in text or "закрой мультфильм" in text:
             self._stop_vlc()
             if self.speaker:
                 self.speaker.speak("Остановила мультфильм.")
