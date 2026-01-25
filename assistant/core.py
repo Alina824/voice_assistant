@@ -8,7 +8,6 @@ from utils import text_files as _tf
 
 from .contracts import RecognizerProtocol, SpeakerProtocol
 
-
 class Command(ABC):
     def __init__(self, name: str = None):
         self._name = name or self.__class__.__name__.lower()
@@ -55,14 +54,6 @@ class FileSystemCommand(Command):
 
     def ensure_directory(self, path: str) -> None:
         _fs.ensure_directory(path)
-
-    @abstractmethod
-    def matches(self, text: str) -> bool:
-        pass
-
-    @abstractmethod
-    def execute(self, text: str, speaker) -> None:
-        pass
 
 
 class TextFileCommand(Command):
@@ -130,6 +121,15 @@ class InteractiveCommand(Command):
                 break
 
     @abstractmethod
+    def matches(self, text: str) -> bool:
+        pass
+
+    @abstractmethod
+    def execute(self, text: str, speaker) -> None:
+        pass
+
+
+class WakeUpCommand(Command):
     def matches(self, text: str) -> bool:
         pass
 
