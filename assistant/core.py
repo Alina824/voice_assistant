@@ -56,15 +56,6 @@ class FileSystemCommand(Command):
     def ensure_directory(self, path: str) -> None:
         _fs.ensure_directory(path)
 
-    @abstractmethod
-    def matches(self, text: str) -> bool:
-        pass
-
-    @abstractmethod
-    def execute(self, text: str, speaker: SpeakerProtocol) -> None:
-        pass
-
-
 class TextFileCommand(Command):
     """Базовая команда для загрузки текстовых файлов через load_lines / load_delimited."""
 
@@ -129,6 +120,16 @@ class InteractiveCommand(Command):
             if handle_response_fn(r):
                 break
 
+    @abstractmethod
+    def matches(self, text: str) -> bool:
+        pass
+
+    @abstractmethod
+    def execute(self, text: str, speaker: SpeakerProtocol) -> None:
+        pass
+
+
+class WakeUpCommand(Command):
     @abstractmethod
     def matches(self, text: str) -> bool:
         pass

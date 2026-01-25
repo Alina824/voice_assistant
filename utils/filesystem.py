@@ -11,7 +11,6 @@ __all__ = [
     "ensure_directory",
 ]
 
-
 def list_files(directory: str, *extensions: str) -> List[str]:
     """
     Список файлов в директории с указанными расширениями.

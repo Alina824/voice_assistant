@@ -4,7 +4,6 @@ from typing import List, Tuple, Optional, Callable
 
 __all__ = ["strip_numbered_prefix", "load_lines", "load_delimited"]
 
-
 def strip_numbered_prefix(line: str) -> str:
     """Срезает префикс вида '1. ' или '42. ' с начала строки. Для use как parse_line в load_lines."""
     s = line.strip() if line else ""
