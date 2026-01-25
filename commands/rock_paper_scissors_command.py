@@ -1,27 +1,25 @@
 import random
 from assistant.core import Command
 
+
 class RockPaperScissorsCommand(Command):
     def __init__(self, recognizer, speaker):
+        super().__init__(name="камень-ножницы-бумага")
         self.recognizer = recognizer
         self.speaker = speaker
-        self.words = {
-            "камень": "rock",
-            "ножницы": "scissors",
-            "бумага": "paper"
-        }
+        self.words = {"камень": "rock", "ножницы": "scissors", "бумага": "paper"}
 
     def matches(self, text: str) -> bool:
         return "камень" in text and "ножницы" in text and "бумага" in text
 
-    def execute(self, text: str):
-        self.speaker.say("Раз, два, три!")
+    def execute(self, text: str, speaker) -> None:
+        speaker.speak("Раз, два, три!")
 
         bot_choice_word = random.choice(list(self.words.keys()))
         bot_choice = self.words[bot_choice_word]
 
-        self.speaker.say("Твой ход?")
-        user_text = self.recognizer.listen().lower()
+        speaker.speak("Твой ход?")
+        user_text = (self.recognizer.recognize() or "").lower()
 
         user_choice = None
         for w in self.words:
@@ -30,19 +28,18 @@ class RockPaperScissorsCommand(Command):
                 break
 
         if not user_choice:
-            self.speaker.say("Я не расслышал твой выбор. Давай попробуем снова.")
+            speaker.speak("Я не расслышал твой выбор. Давай попробуем снова.")
             return
 
-        self.speaker.say(f"Я — {bot_choice_word}!")
+        speaker.speak(f"Я — {bot_choice_word}!")
 
         result = self.determine_winner(user_choice, bot_choice)
-
         if result == "draw":
-            self.speaker.say("Ничья!")
+            speaker.speak("Ничья!")
         elif result == "user":
-            self.speaker.say("Ты победил!")
+            speaker.speak("Ты победил!")
         else:
-            self.speaker.say("Я победил!")
+            speaker.speak("Я победил!")
 
     @staticmethod
     def determine_winner(user, bot):

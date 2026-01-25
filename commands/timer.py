@@ -5,8 +5,11 @@ from assistant.core import Command
 
 
 class TimerCommand(Command):
-    def matches(self, text: str) -> bool:
+    def __init__(self):
         super().__init__(name="поставь таймер")
+
+    def matches(self, text: str) -> bool:
+        return "таймер" in text.lower()
 
     def execute(self, text: str, speaker) -> None:
         minutes = 0
@@ -29,18 +32,18 @@ class TimerCommand(Command):
         total_seconds = minutes * 60 + seconds
 
         if total_seconds == 0:
-            speaker.say("Не поняла, на сколько поставить таймер.")
+            speaker.speak("Не поняла, на сколько поставить таймер.")
             return
 
         threading.Thread(target=self._run_timer, args=(total_seconds, speaker), daemon=True).start()
 
         if minutes > 0 and seconds == 0:
-            speaker.say(f"Таймер на {minutes} минут запущен.")
+            speaker.speak(f"Таймер на {minutes} минут запущен.")
         elif minutes > 0 and seconds == 30:
-            speaker.say(f"Таймер на {minutes} с половиной минут запущен.")
+            speaker.speak(f"Таймер на {minutes} с половиной минут запущен.")
         elif seconds > 0 and minutes == 0:
-            speaker.say(f"Таймер на {seconds} секунд запущен.")
+            speaker.speak(f"Таймер на {seconds} секунд запущен.")
 
     def _run_timer(self, delay: int, speaker) -> None:
         time.sleep(delay)
-        speaker.say("Время вышло!")
+        speaker.speak("Время вышло!")

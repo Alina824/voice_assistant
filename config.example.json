@@ -1,0 +1,15 @@
+{
+  "music_dir": "music",
+  "notes_dir": "notes",
+  "videos_dir": "videos",
+  "jokes_file": "data/jokes.txt",
+  "questions_file": "data/questions.txt",
+  "advices_file": "data/advices",
+  "cities_path": "data/cities_5000.csv",
+  "vocabulary_db_path": "words.db",
+  "vosk_model_path": "model",
+  "whisper_model": "small",
+  "wake_word": "привет",
+  "voice_index": 0,
+  "recognizer": "vosk"
+}

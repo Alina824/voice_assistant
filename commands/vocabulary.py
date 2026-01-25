@@ -3,16 +3,16 @@ import random
 import re
 from assistant.core import Command
 
-DB_NAME = "words.db"
+DEFAULT_DB_PATH = "words.db"
 
 
 def get_table_name(language: str) -> str:
     return f"{language.lower()}_words"
 
 
-def create_table_if_not_exists(language: str):
+def create_table_if_not_exists(language: str, db_path: str = DEFAULT_DB_PATH):
     table = get_table_name(language)
-    with sqlite3.connect(DB_NAME) as conn:
+    with sqlite3.connect(db_path) as conn:
         cur = conn.cursor()
         cur.execute(f"""
             CREATE TABLE IF NOT EXISTS {table} (
@@ -24,18 +24,18 @@ def create_table_if_not_exists(language: str):
         conn.commit()
 
 
-def add_word(language: str, foreign: str, russian: str):
-    create_table_if_not_exists(language)
+def add_word(language: str, foreign: str, russian: str, db_path: str = DEFAULT_DB_PATH):
+    create_table_if_not_exists(language, db_path)
     table = get_table_name(language)
-    with sqlite3.connect(DB_NAME) as conn:
+    with sqlite3.connect(db_path) as conn:
         cur = conn.cursor()
         cur.execute(f"INSERT INTO {table} (foreign_word, russian_word) VALUES (?, ?)", (foreign, russian))
         conn.commit()
 
 
-def delete_word(language: str, word: str):
+def delete_word(language: str, word: str, db_path: str = DEFAULT_DB_PATH):
     table = get_table_name(language)
-    with sqlite3.connect(DB_NAME) as conn:
+    with sqlite3.connect(db_path) as conn:
         cur = conn.cursor()
         cur.execute(f"DELETE FROM {table} WHERE foreign_word = ? OR russian_word = ?", (word, word))
         deleted = cur.rowcount
@@ -43,17 +43,19 @@ def delete_word(language: str, word: str):
         return deleted > 0
 
 
-def get_all_words(language: str):
+def get_all_words(language: str, db_path: str = DEFAULT_DB_PATH):
     table = get_table_name(language)
-    with sqlite3.connect(DB_NAME) as conn:
+    with sqlite3.connect(db_path) as conn:
         cur = conn.cursor()
         cur.execute(f"SELECT foreign_word, russian_word FROM {table}")
         return cur.fetchall()
 
 
 class VocabularyCommand(Command):
-    def __init__(self):
+    def __init__(self, db_path: str = DEFAULT_DB_PATH, recognizer=None):
         super().__init__(name="словарь")
+        self.db_path = db_path
+        self.recognizer = recognizer
         self.help_text = ("Форматы: "
                           "'добавь слово <язык> <иностранное> <перевод>', "
                           "'удали слово <язык> <слово>', "
@@ -68,20 +70,21 @@ class VocabularyCommand(Command):
             "запусти тренировку" in text
         ])
 
-    def execute(self, text: str, speaker, recognizer=None) -> None:
+    def execute(self, text: str, speaker) -> None:
         text = text.lower().strip()
+        rec = self.recognizer
 
         m = re.match(r"добавь слово (\w+) '(.+?)' '(.+?)'", text)
         if m:
             language, foreign, russian = m.groups()
-            add_word(language, foreign, russian)
+            add_word(language, foreign, russian, self.db_path)
             speaker.speak(f"Слово {foreign} добавлено в {language}")
             return
 
         m = re.match(r"удали слово (\w+) '(.+?)'", text)
         if m:
             language, word = m.groups()
-            if delete_word(language, word):
+            if delete_word(language, word, self.db_path):
                 speaker.speak(f"Слово {word} удалено из {language}")
             else:
                 speaker.speak("Слово не найдено")
@@ -90,7 +93,7 @@ class VocabularyCommand(Command):
         m = re.match(r"запусти тренировку (\w+)$", text)
         if m:
             language = m.group(1)
-            words = get_all_words(language)
+            words = get_all_words(language, self.db_path)
             if not words:
                 speaker.speak("В базе нет слов")
                 return
@@ -99,7 +102,7 @@ class VocabularyCommand(Command):
             while True:
                 foreign, russian = random.choice(words)
                 speaker.speak(f"Переведи {foreign}")
-                answer = recognizer.recognize() if recognizer else input("> ").strip()
+                answer = rec.recognize() if rec else input("> ").strip()
 
                 if not answer or answer.lower() in ("стоп", "выход", "всё"):
                     speaker.speak("Тренировка завершена")
@@ -113,7 +116,7 @@ class VocabularyCommand(Command):
         m = re.match(r"запусти тренировку русский-(\w+)$", text)
         if m:
             language = m.group(1)
-            words = get_all_words(language)
+            words = get_all_words(language, self.db_path)
             if not words:
                 speaker.speak("В базе нет слов")
                 return
@@ -122,7 +125,7 @@ class VocabularyCommand(Command):
             while True:
                 foreign, russian = random.choice(words)
                 speaker.speak(f"Переведи {russian}")
-                answer = recognizer.recognize() if recognizer else input("> ").strip()
+                answer = rec.recognize() if rec else input("> ").strip()
 
                 if not answer or answer.lower() in ("стоп", "выход", "всё"):
                     speaker.speak("Тренировка завершена")

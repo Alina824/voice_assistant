@@ -1,39 +1,21 @@
 import random
 from assistant.core import Command
+from utils.text_files import load_lines, strip_numbered_prefix
+
 
 class AdviceCommand(Command):
-    def __init__(self, advices_file, speaker):
+    def __init__(self, advices_file, speaker=None):
+        super().__init__(name="совет")
         self.advices_file = advices_file
-        self.speaker = speaker
-        self.advices = self.load_advices()
-
-    def load_advices(self):
-        advices = []
-        try:
-            with open(self.advices_file, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if line:
-                        if line[0].isdigit() and "." in line:
-                            line = line.split(".", 1)[1].strip()
-                        advices.append(line)
-        except FileNotFoundError:
-            print(f"[AdviceCommand] Файл не найден: {self.advices_file}")
-        return advices
+        self.advices = load_lines(advices_file, parse_line=strip_numbered_prefix)
 
     def matches(self, text: str) -> bool:
         text = text.lower()
+        return "совет" in text or "вредный совет" in text or ("дай" in text and "совет" in text)
 
-        return (
-            "совет" in text
-            or "вредный совет" in text
-            or ("дай" in text and "совет" in text)
-        )
-
-    def execute(self, text: str):
+    def execute(self, text: str, speaker) -> None:
         if not self.advices:
-            self.speaker.say("Файл советов пуст или не найден.")
+            speaker.speak("Файл советов пуст или не найден.")
             return
-
         advice = random.choice(self.advices)
-        self.speaker.say(advice)
+        speaker.speak(advice)

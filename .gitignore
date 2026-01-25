@@ -29,3 +29,9 @@ venv.bak/
 # Временные файлы
 *.log
 *.tmp
+
+# Локальный конфиг (шаблон — config.example.json)
+config.json
+
+# Pytest
+.pytest_cache/
