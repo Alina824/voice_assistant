@@ -1,13 +1,9 @@
-"""Тесты для utils.numeric: words_to_numbers, parse_number."""
-
 import pytest
 
 from utils.numeric import words_to_numbers, parse_number
 
 
 class TestWordsToNumbers:
-    """Типовые фразы: замена числительных на цифры."""
-
     def test_single_digit_words(self):
         assert words_to_numbers("один два три") == "1 2 3"
         assert words_to_numbers("ноль") == "0"
@@ -41,8 +37,6 @@ class TestWordsToNumbers:
 
 
 class TestParseNumber:
-    """Извлечение одного числа из строки: цифры или слова."""
-
     def test_digits_only(self):
         assert parse_number("5") == 5
         assert parse_number("42") == 42
