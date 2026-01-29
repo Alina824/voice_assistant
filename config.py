@@ -12,7 +12,6 @@ from typing import Any
 _CONFIG_DIR = Path(__file__).resolve().parent
 _DEFAULT_CONFIG_PATH = _CONFIG_DIR / "config.json"
 
-# Встроенные значения по умолчанию (обратная совместиость со старыми путями из main)
 _DEFAULTS = {
     "music_dir": "music",
     "notes_dir": "notes",
@@ -57,7 +56,6 @@ def load_config(path: str | Path | None = None) -> dict[str, Any]:
     for key in list(config.keys()):
         ov = _env_override(key)
         if ov is not None:
-            # числа — оставляем как строку из env, для voice_index преобразуем
             if key == "voice_index":
                 try:
                     config[key] = int(ov)
