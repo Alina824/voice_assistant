@@ -27,8 +27,6 @@ class Command(ABC):
 
 
 class FileSystemCommand(Command):
-    """Базовая команда для работы с файловой системой. Использует utils.filesystem."""
-
     def __init__(self, base_dir: str, name: str = None):
         super().__init__(name=name)
         self._base_dir = base_dir
@@ -37,7 +35,6 @@ class FileSystemCommand(Command):
         return _fs.list_files(self._base_dir, *extensions)
 
     def list_files_in(self, directory: str, *extensions: str) -> List[str]:
-        """Список файлов в произвольной директории (для вложенных: сезон/серия)."""
         return _fs.list_files(directory, *extensions)
 
     def find_file_by_name(
@@ -57,8 +54,6 @@ class FileSystemCommand(Command):
         _fs.ensure_directory(path)
 
 class TextFileCommand(Command):
-    """Базовая команда для загрузки текстовых файлов через load_lines / load_delimited."""
-
     def _load_lines_safe(
         self,
         filepath: str,
@@ -95,8 +90,6 @@ class TextFileCommand(Command):
 
 
 class InteractiveCommand(Command):
-    """Базовая команда с циклом recognizer.recognize() и проверкой стоп-слов."""
-
     def __init__(self, recognizer, name: str = None):
         super().__init__(name=name)
         self.recognizer = recognizer
@@ -108,7 +101,6 @@ class InteractiveCommand(Command):
         prompt_fn: Callable[[], str],
         handle_response_fn: Callable[[str], bool],
     ) -> None:
-        """Цикл: prompt_fn() → speak → recognize() → стоп-фразы или handle_response_fn(resp) → True для выхода."""
         while True:
             speaker.speak(prompt_fn())
             r = self.recognizer.recognize()
