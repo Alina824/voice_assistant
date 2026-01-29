@@ -1,7 +1,7 @@
 # Игнорировать папку model
 model/
 
-# Игнорировать файлы библиотек Python
+# Файлы библиотек Python
 __pycache__/
 *.py[cod]
 *$py.class
