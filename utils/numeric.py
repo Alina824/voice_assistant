@@ -1,12 +1,8 @@
-"""Утилиты для преобразования слов в числа (0–59) и разбора одного числа из текста."""
-
 import re
 from typing import Optional
 
 __all__ = ["words_to_numbers", "parse_number"]
 
-# Приватный словарь: одиночные слова и пары (двадцать одна, тридцать две и т.п.).
-# Включены «одна», «две», «раз» для parse_number (мангулы и т.п.).
 NUMBERS = {
     "ноль": 0,
     "один": 1, "одна": 1, "раз": 1,
@@ -72,10 +68,6 @@ NUMBERS = {
 
 
 def words_to_numbers(text: str) -> str:
-    """
-    Заменяет числительные (слова и пары вроде «двадцать одна») на цифры в строке.
-    Сначала проверяются двухсловные пары, затем одиночные.
-    """
     words = text.lower().split()
     result = []
     i = 0
@@ -95,16 +87,10 @@ def words_to_numbers(text: str) -> str:
 
 
 def parse_number(text: str) -> Optional[int]:
-    """
-    Извлекает одно число из строки: либо цифры, либо слово/пара слов из NUMBERS.
-    Возвращает первое найденное число или None.
-    """
     t = text.strip().lower()
-    # 1) Цифры в строке
     digits = "".join(c for c in t if c.isdigit())
     if digits:
         return int(digits)
-    # 2) Слова: сначала пары, потом одиночные
     replaced = words_to_numbers(t)
     m = re.search(r"\d+", replaced)
     if m:
