@@ -1,7 +1,3 @@
-"""
-Загрузка конфигурации из JSON. Значения по умолчанию для отсутствующих ключей.
-Override через переменные окружения: VOICE_ASSISTANT_<KEY> (ключ в UPPER_CASE).
-"""
 from __future__ import annotations
 
 import json
