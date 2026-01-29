@@ -26,17 +26,11 @@ _DEFAULTS = {
 
 
 def _env_override(key: str) -> str | None:
-    """VOICE_ASSISTANT_<KEY> — например VOICE_ASSISTANT_MUSIC_DIR."""
     env_key = "VOICE_ASSISTANT_" + key.upper()
     return os.environ.get(env_key)
 
 
 def load_config(path: str | Path | None = None) -> dict[str, Any]:
-    """
-    Загружает конфиг из JSON. Если файла нет или ключ отсутствует — подставляются _DEFAULTS.
-    Переменные окружения: VOICE_ASSISTANT_CONFIG — путь к конфигу;
-    VOICE_ASSISTANT_<KEY> — переопределение значения ключа.
-    """
     config = _DEFAULTS.copy()
     cfg_path = Path(path or os.environ.get("VOICE_ASSISTANT_CONFIG") or _DEFAULT_CONFIG_PATH)
 
@@ -64,7 +58,6 @@ def load_config(path: str | Path | None = None) -> dict[str, Any]:
 
 
 def save_example_config(path: str | Path | None = None) -> None:
-    """Сохраняет config.example.json с текущими _DEFAULTS (для документации)."""
     p = Path(path) if path else _CONFIG_DIR / "config.example.json"
     with open(p, "w", encoding="utf-8") as f:
         json.dump(_DEFAULTS, f, ensure_ascii=False, indent=2)
