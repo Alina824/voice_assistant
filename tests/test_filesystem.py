@@ -1,5 +1,3 @@
-"""Тесты для utils.filesystem на временной директории."""
-
 import os
 import tempfile
 from pathlib import Path
@@ -17,7 +15,6 @@ from utils.filesystem import (
 
 @pytest.fixture
 def tmpdir():
-    """Временная директория; после теста удаляется."""
     with tempfile.TemporaryDirectory() as d:
         yield d
 
