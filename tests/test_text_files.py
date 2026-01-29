@@ -1,5 +1,3 @@
-"""Тесты для utils.text_files: load_lines, load_delimited, strip_numbered_prefix."""
-
 import tempfile
 from pathlib import Path
 
@@ -10,7 +8,6 @@ from utils.text_files import load_lines, load_delimited, strip_numbered_prefix
 
 @pytest.fixture
 def tmpfile():
-    """Временный файл; после теста удаляется."""
     with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False, encoding="utf-8") as f:
         yield f.name
     Path(f.name).unlink(missing_ok=True)
@@ -40,7 +37,6 @@ def test_load_lines_with_parse_line(tmpfile):
 
 
 def test_load_lines_numbered_joke_format(tmpfile):
-    """Формат анекдотов/советов: «1. текст»."""
     Path(tmpfile).write_text(
         "1. Первый анекдот.\n2. Второй анекдот.\n\n3. Третий.\n",
         encoding="utf-8",
@@ -75,7 +71,6 @@ def test_load_delimited_file_not_found():
 
 
 def test_load_delimited_questions_format(tmpfile):
-    """Формат викторины: «вопрос;ответ»."""
     Path(tmpfile).write_text(
         "Столица России?;Москва\nДва плюс два?;Четыре\n",
         encoding="utf-8",
